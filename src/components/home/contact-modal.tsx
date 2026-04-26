@@ -18,25 +18,36 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [subject, setSubject] = useState<SubjectOption>("Steerlo Support Request");
+  const [sending, setSending] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [closeTimerId, setCloseTimerId] = useState<number | null>(null);
 
   const canSend = useMemo(() => message.trim().length > 0, [message]);
-  const mailtoLink = useMemo(() => {
-    const body = [
-      `Name: ${name.trim() || "Not provided"}`,
-      `Email: ${email.trim() || "Not provided"}`,
-      "",
-      "Message:",
-      message.trim()
-    ].join("\n");
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    return `mailto:${supportEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  }, [email, message, name, subject]);
+  const isEmailValid = useMemo(() => {
+    if (!email.trim()) {
+      return true;
+    }
+
+    return emailPattern.test(email.trim());
+  }, [email]);
+
+  const canSubmit = canSend && isEmailValid && !sending;
 
   function resetForm() {
     setName("");
     setEmail("");
     setMessage("");
     setSubject("Steerlo Support Request");
+    setSending(false);
+    setStatusMessage(null);
+    setErrorMessage(null);
+    if (closeTimerId !== null) {
+      window.clearTimeout(closeTimerId);
+      setCloseTimerId(null);
+    }
   }
 
   function handleClose() {
@@ -70,17 +81,46 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
     return null;
   }
 
-  function handleSendMessage() {
-    if (!canSend) {
+  async function handleSendMessage() {
+    if (!canSubmit) {
       return;
     }
 
-    const link = document.createElement("a");
-    link.href = mailtoLink;
-    link.rel = "noreferrer";
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
+    setSending(true);
+    setStatusMessage(null);
+    setErrorMessage(null);
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          name: name.trim(),
+          email: email.trim(),
+          message: message.trim(),
+          subject
+        })
+      });
+
+      const data = (await response.json()) as { error?: string };
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to send message. Please try again.");
+      }
+
+      setStatusMessage("Message sent successfully");
+
+      const timerId = window.setTimeout(() => {
+        handleClose();
+      }, 1000);
+
+      setCloseTimerId(timerId);
+    } catch {
+      setErrorMessage("Failed to send message. Please try again.");
+      setSending(false);
+    }
   }
 
   return (
@@ -145,7 +185,13 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
           </button>
         </div>
 
-        <form className="mt-5 space-y-3" onSubmit={(event) => event.preventDefault()}>
+        <form
+          className="mt-5 space-y-3"
+          onSubmit={(event) => {
+            event.preventDefault();
+            void handleSendMessage();
+          }}
+        >
           <div>
             <label htmlFor="contact-name" className="mb-1 block text-sm font-medium text-white/90">
               Name (optional)
@@ -172,6 +218,7 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
               className="w-full rounded-lg border border-white/20 bg-slate-950/50 px-3 py-2 text-sm text-white placeholder:text-white/50 outline-none transition focus:border-indigo-300 focus:ring-4 focus:ring-indigo-400/20"
               placeholder="you@example.com"
             />
+            {!isEmailValid ? <p className="mt-1 text-xs text-rose-300">Please enter a valid email address.</p> : null}
           </div>
 
           <div>
@@ -190,12 +237,11 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
 
           <div className="flex items-center gap-2">
             <button
-              type="button"
-              onClick={handleSendMessage}
-              disabled={!canSend}
+              type="submit"
+              disabled={!canSubmit}
               className="rounded-lg bg-indigo-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-400 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Send Message
+              {sending ? "Sending..." : "Send Message"}
             </button>
             <button
               type="button"
@@ -205,6 +251,9 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
               Cancel
             </button>
           </div>
+
+          {statusMessage ? <p className="text-sm text-emerald-200">{statusMessage}</p> : null}
+          {errorMessage ? <p className="text-sm text-rose-300">{errorMessage}</p> : null}
         </form>
       </motion.div>
     </div>

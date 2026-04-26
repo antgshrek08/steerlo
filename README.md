@@ -68,6 +68,19 @@ GROQ_MODEL=llama-3.3-70b-versatile
 
 `GROQ_MODEL` is optional. If you omit it, the app uses `llama-3.3-70b-versatile`.
 
+## Contact Form Setup
+
+The homepage contact modal sends messages through the API route at `/api/contact`.
+
+For production email delivery, add these environment variables in Vercel and `.env.local`:
+
+```bash
+RESEND_API_KEY=your-resend-api-key
+CONTACT_FROM_EMAIL=Steerlo <onboarding@resend.dev>
+```
+
+If `RESEND_API_KEY` is missing in development, the route uses a safe local fallback so you can verify the UI flow without sending a real email.
+
 ## Database Setup
 
 Create a table named `essay_submissions` in Supabase for saved essay requests and AI results.
