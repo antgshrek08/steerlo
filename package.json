@@ -1,0 +1,35 @@
+{
+  "name": "steerlo",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@google/genai": "^1.50.1",
+    "@supabase/ssr": "latest",
+    "@supabase/supabase-js": "latest",
+    "firebase": "^12.12.1",
+    "framer-motion": "^12.38.0",
+    "groq-sdk": "^1.1.2",
+    "lucide-react": "^1.9.0",
+    "next": "latest",
+    "react": "latest",
+    "react-dom": "latest"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.2.4",
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "autoprefixer": "latest",
+    "eslint": "latest",
+    "eslint-config-next": "latest",
+    "postcss": "latest",
+    "tailwindcss": "latest",
+    "typescript": "latest"
+  }
+}
