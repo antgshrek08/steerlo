@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 
-const supportEmail = "support@steerlo.com";
+const supportEmail = "steerlo.contact@gmail.com";
 const firebaseApiKey = "AIzaSyAxJYIPUNAByBrnvYx1ujpZ_8PT7wgxdyE";
 const allowedSubjects = new Set([
   "Steerlo Support Request",
@@ -108,7 +108,7 @@ export async function POST(request: Request) {
           body
         });
 
-        return NextResponse.json({ ok: true }, { status: 200 });
+        return NextResponse.json({ success: true }, { status: 200 });
       }
 
       return NextResponse.json(
@@ -127,13 +127,26 @@ export async function POST(request: Request) {
     });
 
     if (error) {
+      console.error("[contact] resend send failed", {
+        message: error.message,
+        to: supportEmail,
+        from: fromEmail,
+        replyTo: verifiedUser.email
+      });
       return NextResponse.json(
         { error: error.message || "Failed to send message. Please try again." },
         { status: 500 }
       );
     }
 
-    return NextResponse.json({ ok: true }, { status: 200 });
+    console.log("[contact] message sent", {
+      to: supportEmail,
+      from: fromEmail,
+      replyTo: verifiedUser.email,
+      subject: "New Steerlo Support Message"
+    });
+
+    return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {
     console.error("Contact form send failed", error);
     return NextResponse.json({ error: "Failed to send message. Please try again." }, { status: 500 });

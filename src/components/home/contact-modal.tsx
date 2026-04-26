@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { X } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -12,7 +12,7 @@ type ContactModalProps = {
 
 type SubjectOption = "Steerlo Support Request" | "Steerlo Bug Report" | "Steerlo Question" | "Steerlo Feedback";
 
-const supportEmail = "support@steerlo.com";
+const supportEmail = "steerlo.contact@gmail.com";
 
 export function ContactModal({ isOpen, onClose }: ContactModalProps) {
   const [message, setMessage] = useState("");
@@ -20,28 +20,28 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
   const [sending, setSending] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [closeTimerId, setCloseTimerId] = useState<number | null>(null);
+  const closeTimerRef = useRef<number | null>(null);
   const { loading, openAuthModal, user } = useAuth();
 
   const canSend = useMemo(() => message.trim().length > 0, [message]);
   const canSubmit = canSend && Boolean(user?.email) && !sending;
 
-  function resetForm() {
+  const resetForm = useCallback(() => {
     setMessage("");
     setSubject("Steerlo Support Request");
     setSending(false);
     setStatusMessage(null);
     setErrorMessage(null);
-    if (closeTimerId !== null) {
-      window.clearTimeout(closeTimerId);
-      setCloseTimerId(null);
+    if (closeTimerRef.current !== null) {
+      window.clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
     }
-  }
+  }, []);
 
-  function handleClose() {
+  const handleClose = useCallback(() => {
     resetForm();
     onClose();
-  }
+  }, [onClose, resetForm]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -49,7 +49,7 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
     }
 
     if (!loading && !user) {
-      handleClose();
+      onClose();
       openAuthModal("login");
       return;
     }
@@ -69,7 +69,7 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", handleEscape);
     };
-  }, [isOpen, loading, openAuthModal, user]);
+  }, [handleClose, isOpen, loading, onClose, openAuthModal, user]);
 
   if (!isOpen) {
     return null;
@@ -110,7 +110,7 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
         handleClose();
       }, 1000);
 
-      setCloseTimerId(timerId);
+      closeTimerRef.current = timerId;
     } catch {
       setErrorMessage("Failed to send message. Please try again.");
       setSending(false);
