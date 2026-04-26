@@ -14,7 +14,7 @@ export function Hero() {
         style={{ opacity: iconOpacity, scale: iconScale }}
         className="pointer-events-none absolute inset-0 z-[1] flex items-center justify-center"
       >
-        <div className="relative h-[520px] w-[1200px] select-none md:h-[680px] md:w-[1550px] lg:h-[860px] lg:w-[2000px]">
+        <div className="relative h-[380px] w-[140vw] max-w-[1200px] select-none md:h-[680px] md:w-[1550px] md:max-w-none lg:h-[860px] lg:w-[2000px]">
           <Image
             src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/steerlo%20logo-iAJlxlaPrYxpZth5b2pp7C8P4Zd0Lf.png"
             alt=""
