@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { AuthProvider } from "@/components/auth/AuthProvider";
 import { ProfileSummaryProvider } from "@/components/profile/ProfileSummaryProvider";
 import { SettingsAccess } from "@/components/settings/SettingsAccess";
@@ -21,6 +21,13 @@ export const metadata: Metadata = {
     title: "Steerlo",
     description: "Guided high school application tools for essays, activities, and planning."
   }
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#2f4a67"
 };
 
 export default function RootLayout({
