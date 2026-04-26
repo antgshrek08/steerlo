@@ -6,11 +6,18 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://steerlo.app"),
+  applicationName: "Steerlo",
   title: {
     default: "Steerlo",
     template: "%s | Steerlo"
   },
   description: "Steerlo helps students build stronger applications with guided writing, profile insights, and planning tools.",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    title: "Steerlo",
+    statusBarStyle: "black-translucent"
+  },
   openGraph: {
     title: "Steerlo",
     description: "Guided high school application tools for essays, activities, and planning.",
@@ -27,7 +34,10 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#2f4a67"
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#2f4a67" },
+    { media: "(prefers-color-scheme: dark)", color: "#2f4a67" }
+  ]
 };
 
 export default function RootLayout({
