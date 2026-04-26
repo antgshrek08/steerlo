@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-const supportEmail = "support@steerlo.com";
+const supportEmail = "steerlo.contact@gmail.com";
 const allowedSubjects = new Set([
   "Steerlo Support Request",
   "Steerlo Bug Report",

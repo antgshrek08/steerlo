@@ -11,7 +11,7 @@ type ContactModalProps = {
 
 type SubjectOption = "Steerlo Support Request" | "Steerlo Bug Report" | "Steerlo Question" | "Steerlo Feedback";
 
-const supportEmail = "support@steerlo.com";
+const supportEmail = "steerlo.contact@gmail.com";
 
 export function ContactModal({ isOpen, onClose }: ContactModalProps) {
   const [name, setName] = useState("");
