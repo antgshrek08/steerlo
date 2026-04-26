@@ -11,7 +11,7 @@ type ContactModalProps = {
 
 type SubjectOption = "Steerlo Support Request" | "Steerlo Bug Report" | "Steerlo Question" | "Steerlo Feedback";
 
-const supportEmail = "steerlo.contact@gmail.com";
+const supportEmail = "support@steerlo.com";
 
 export function ContactModal({ isOpen, onClose }: ContactModalProps) {
   const [name, setName] = useState("");
@@ -158,7 +158,7 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
         </p>
 
         <p className="mt-3 rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-xs text-white/75">
-          This will open your email app to send the message
+          This sends your message directly to the support inbox
         </p>
 
         <div className="mt-4 flex flex-wrap gap-2">
