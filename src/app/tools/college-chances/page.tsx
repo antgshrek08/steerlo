@@ -6,6 +6,8 @@ import { Loader2, Sparkles } from "lucide-react";
 import { Navbar } from "@/components/home/navbar";
 import { useProfileSummary } from "@/components/profile/ProfileSummaryProvider";
 import { CollegeOption } from "@/components/tools/CollegeOption";
+import { trackEvent } from "@/lib/analytics";
+import { captureExceptionWithContext } from "@/lib/sentry";
 
 type ChanceStatus = "Reach" | "Target" | "Safety";
 type CourseRigorValue =
@@ -226,6 +228,11 @@ export default function CollegeChancesPage() {
           return;
         }
 
+        captureExceptionWithContext(loadError, {
+          action: "api_colleges_load",
+          page: "/tools/college-chances"
+        });
+
         const message = loadError instanceof Error ? loadError.message : "Failed to load colleges.";
         setCollegesError(message);
         setCollegeOptions([]);
@@ -390,6 +397,11 @@ export default function CollegeChancesPage() {
 
       const chanceResults = Array.isArray(data) ? data : [];
       setResults(chanceResults);
+      trackEvent("checked_college_chances", {
+        selected_college_count: formState.selectedColleges.length,
+        result_count: chanceResults.length,
+        test_type: formState.testType
+      });
 
       const weightedGpa = parseNumericValue(formState.gpa.trim());
       const testScore = parseNumericValue(formState.testScore.trim());
@@ -412,11 +424,16 @@ export default function CollegeChancesPage() {
       setSavedSignature(currentSaveSignature);
       setSaveMessage("Saved to Profile Summary.");
     } catch (submitError) {
+      captureExceptionWithContext(submitError, {
+        action: "api_college_chances_submit",
+        page: "/tools/college-chances"
+      });
       setError(submitError instanceof Error ? submitError.message : "Something went wrong while generating chances.");
     } finally {
       setLoading(false);
     }
   }
+
 
   function handleSaveProfileInfo() {
     const weightedGpa = parseNumericValue(formState.gpa.trim());

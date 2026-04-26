@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { AuthProvider } from "@/components/auth/AuthProvider";
+import { PostHogInit } from "@/components/analytics/PostHogInit";
 import { ProfileSummaryProvider } from "@/components/profile/ProfileSummaryProvider";
 import { SettingsAccess } from "@/components/settings/SettingsAccess";
 import "./globals.css";
@@ -48,6 +49,7 @@ export default function RootLayout({
   return (
     <html lang="en" data-scroll-behavior="smooth">
       <body>
+        <PostHogInit />
         <a
           href="#main-content"
           className="sr-only z-[60] rounded-md bg-white px-3 py-2 text-sm font-semibold text-slate-900 focus:not-sr-only focus:fixed focus:left-4 focus:top-4"
@@ -64,3 +66,4 @@ export default function RootLayout({
     </html>
   );
 }
+

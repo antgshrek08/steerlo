@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import Groq from "groq-sdk";
+import * as Sentry from "@sentry/nextjs";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 type EssayFormData = {
@@ -157,6 +158,17 @@ export async function POST(request: Request) {
 
     return NextResponse.json(ideas);
   } catch (generationError) {
+    Sentry.withScope((scope) => {
+      scope.setTag("capture_source", "manual");
+      scope.setTag("route", "/api/essay");
+      scope.setContext("app_context", {
+        action: "ai_generate_essay",
+        route: "/api/essay",
+        model
+      });
+      Sentry.captureException(generationError);
+    });
+
     const message =
       generationError instanceof Error ? generationError.message : "Failed to generate essay ideas from Groq API.";
     return NextResponse.json({ error: message }, { status: 502 });

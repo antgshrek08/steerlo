@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import Groq from "groq-sdk";
+import * as Sentry from "@sentry/nextjs";
 import { checkRateLimit, createRequestId, getClientIp } from "@/lib/api";
 
 type EssayStarterInput = {
@@ -154,6 +155,18 @@ export async function POST(request: Request) {
     const ideas = parseIdeas(content);
     return NextResponse.json(ideas, { headers: { "x-request-id": requestId } });
   } catch (generationError) {
+    Sentry.withScope((scope) => {
+      scope.setTag("capture_source", "manual");
+      scope.setTag("route", "/api/essay-starter");
+      scope.setContext("app_context", {
+        action: "ai_generate_essay_starter",
+        route: "/api/essay-starter",
+        requestId,
+        model
+      });
+      Sentry.captureException(generationError);
+    });
+
     const message =
       generationError instanceof Error ? generationError.message : "Failed to generate essay starter ideas.";
     return NextResponse.json({ error: message, requestId }, { status: 502, headers: { "x-request-id": requestId } });

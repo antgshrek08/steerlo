@@ -7,6 +7,7 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { useProfileSummary } from "@/components/profile/ProfileSummaryProvider";
 import { getProfileReadinessBreakdown, getProfileReadinessColor, getProfileReadinessTier, hasMeaningfulProfileData } from "@/components/profile/profileReadiness";
 import { getRankBadgeText, rankActivities } from "@/components/activity-builder/activityRanking";
+import { captureExceptionWithContext } from "@/lib/sentry";
 
 type ProfileInsights = {
   strengths: string[];
@@ -205,6 +206,11 @@ function ProfileInsightsCard() {
         if (abortController.signal.aborted) {
           return;
         }
+
+        captureExceptionWithContext(requestError, {
+          action: "api_profile_insights_generate",
+          page: "/dashboard"
+        });
 
         const message = requestError instanceof Error ? requestError.message : "Could not generate insights right now.";
         setError(message);

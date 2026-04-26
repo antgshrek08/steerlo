@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import Groq from "groq-sdk";
+import * as Sentry from "@sentry/nextjs";
 import { checkRateLimit, createRequestId, getClientIp } from "@/lib/api";
 
 type ActivityInput = {
@@ -270,6 +271,19 @@ export async function POST(request: Request) {
     const result = parseResults(content, activities.length);
     return NextResponse.json(result, { headers: { "x-request-id": requestId } });
   } catch (generationError) {
+    Sentry.withScope((scope) => {
+      scope.setTag("capture_source", "manual");
+      scope.setTag("route", "/api/activity-builder");
+      scope.setContext("app_context", {
+        action: "ai_generate_activity_builder",
+        route: "/api/activity-builder",
+        requestId,
+        model,
+        activityCount: activities.length
+      });
+      Sentry.captureException(generationError);
+    });
+
     const message = generationError instanceof Error ? generationError.message : "Failed to analyze activity.";
     return NextResponse.json({ error: message, requestId }, { status: 502, headers: { "x-request-id": requestId } });
   }

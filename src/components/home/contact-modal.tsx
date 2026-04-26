@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { X } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { captureExceptionWithContext } from "@/lib/sentry";
 
 type ContactModalProps = {
   isOpen: boolean;
@@ -111,7 +112,11 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
       }, 1000);
 
       closeTimerRef.current = timerId;
-    } catch {
+    } catch (requestError) {
+      captureExceptionWithContext(requestError, {
+        action: "api_contact_submit",
+        page: "/"
+      });
       setErrorMessage("Failed to send message. Please try again.");
       setSending(false);
     }

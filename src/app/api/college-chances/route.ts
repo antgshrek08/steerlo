@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import Groq from "groq-sdk";
+import * as Sentry from "@sentry/nextjs";
 import { colleges, collegesById } from "@/lib/colleges";
 
 type ChanceStatus = "Reach" | "Target" | "Safety";
@@ -331,6 +332,19 @@ export async function POST(request: Request) {
     const results = parseResults(content, schools);
     return NextResponse.json(results);
   } catch (generationError) {
+    Sentry.withScope((scope) => {
+      scope.setTag("capture_source", "manual");
+      scope.setTag("route", "/api/college-chances");
+      scope.setContext("app_context", {
+        action: "ai_generate_college_chances",
+        route: "/api/college-chances",
+        model,
+        schoolCount: schools.length,
+        testType
+      });
+      Sentry.captureException(generationError);
+    });
+
     const message = generationError instanceof Error ? generationError.message : "Failed to generate college chances.";
     return NextResponse.json({ error: message }, { status: 502 });
   }

@@ -3,7 +3,9 @@
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import type { User as FirebaseUser } from "firebase/auth";
 import { onAuthStateChanged } from "firebase/auth";
+import * as Sentry from "@sentry/nextjs";
 import { auth } from "@/lib/firebase";
+import { trackEvent } from "@/lib/analytics";
 import { logIn as firebaseLogIn, logOut as firebaseLogOut, signInWithGoogle as firebaseSignInWithGoogle, signUp as firebaseSignUp } from "@/lib/auth";
 
 type AuthMode = "login" | "signup";
@@ -48,6 +50,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       setUser(firebaseUser ?? null);
+
+      if (firebaseUser) {
+        Sentry.setUser({ id: firebaseUser.uid });
+      } else {
+        Sentry.setUser(null);
+      }
 
       if (firebaseUser) {
         setIsGuest(false);
@@ -102,6 +110,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   async function signIn(email: string, password: string) {
     try {
       await firebaseLogIn(email, password);
+      trackEvent("user_logged_in", { method: "password" });
       finishAuthenticatedSession();
       return null;
     } catch (error) {
@@ -112,6 +121,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   async function signUp(email: string, password: string, name?: string) {
     try {
       await firebaseSignUp(email, password, name);
+      trackEvent("user_signed_up", { method: "password" });
       finishAuthenticatedSession();
       return null;
     } catch (error) {
@@ -122,6 +132,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   async function signInWithGoogle() {
     try {
       await firebaseSignInWithGoogle();
+      trackEvent("user_logged_in", { method: "google" });
       finishAuthenticatedSession();
       return null;
     } catch (error) {
@@ -145,6 +156,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsGuest(true);
     setAuthModalOpen(false);
     setSignupPromptSource(null);
+    Sentry.setUser(null);
+    trackEvent("guest_mode_started");
   }
 
   return (
@@ -182,3 +195,4 @@ export function useAuth() {
 
   return context;
 }
+

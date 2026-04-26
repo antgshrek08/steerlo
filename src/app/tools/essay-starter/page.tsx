@@ -6,6 +6,8 @@ import { Loader2, Sparkles } from "lucide-react";
 import { Navbar } from "@/components/home/navbar";
 import { useProfileSummary } from "@/components/profile/ProfileSummaryProvider";
 import { VideoBackground } from "@/components/layout/VideoBackground";
+import { trackEvent } from "@/lib/analytics";
+import { captureExceptionWithContext } from "@/lib/sentry";
 
 type StarterIdea = {
   question: string;
@@ -165,6 +167,7 @@ export default function EssayStarterPage() {
         : [];
 
       setResults(ideas);
+      trackEvent("generated_essay", { tool: "essay_starter", idea_count: ideas.length });
       recordEssayIdeas(ideas.map((idea) => ({ topic: idea.topic })));
 
       const nextHistory = [
@@ -178,11 +181,16 @@ export default function EssayStarterPage() {
 
       persistHistory(nextHistory);
     } catch (submitError) {
+      captureExceptionWithContext(submitError, {
+        action: "api_essay_starter_submit",
+        page: "/tools/essay-starter"
+      });
       setError(submitError instanceof Error ? submitError.message : "Something went wrong while generating ideas.");
     } finally {
       setLoading(false);
     }
   }
+
 
   function clearHistory() {
     setHistory([]);

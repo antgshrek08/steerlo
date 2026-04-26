@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useProfileSummary } from "@/components/profile/ProfileSummaryProvider";
+import { trackEvent } from "@/lib/analytics";
+import { captureExceptionWithContext } from "@/lib/sentry";
 
 type BrainstormResponse = {
   topic: string;
@@ -41,17 +43,23 @@ export function BrainstormForm() {
 
       const data = (await response.json()) as BrainstormResponse;
       setResult(data);
+      trackEvent("generated_essay", { tool: "brainstorm", idea_count: Array.isArray(data.ideas) ? data.ideas.length : 0 });
 
       if (Array.isArray(data.ideas) && data.ideas.length) {
         recordEssayIdeas(data.ideas.map((idea) => ({ topic: idea })));
       }
-    } catch {
+    } catch (requestError) {
+      captureExceptionWithContext(requestError, {
+        action: "api_brainstorm_submit",
+        page: "/brainstorm"
+      });
       setError("Something went wrong. Please try again with a clearer topic.");
       setResult(null);
     } finally {
       setLoading(false);
     }
   }
+
 
   return (
     <div className="rounded-2xl border border-white/20 bg-white/10 p-6 shadow-[0_8px_30px_rgba(15,23,42,0.3)] backdrop-blur-lg md:p-8">

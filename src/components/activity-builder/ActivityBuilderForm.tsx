@@ -4,6 +4,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowDown, ArrowUp, ChevronLeft, ChevronRight, Copy, Loader2, Pin, Sparkles } from "lucide-react";
 import { useProfileSummary } from "@/components/profile/ProfileSummaryProvider";
+import { trackEvent } from "@/lib/analytics";
+import { captureExceptionWithContext } from "@/lib/sentry";
 import { getRankBadgeText, rankActivities, reorderRankedActivities, trimActivityDescription, type RankedActivity } from "@/components/activity-builder/activityRanking";
 
 type ActivityFormState = {
@@ -466,16 +468,22 @@ export function ActivityBuilderForm() {
       setCurrentActivityIndex(0);
       setDraftMessage("Edit your top activities, then save them to your profile.");
       setDraftError(null);
+      trackEvent("used_activity_builder", { activity_count: nextResults.length });
 
       requestAnimationFrame(() => {
         scrollToTopActivities();
       });
     } catch (submitError) {
+      captureExceptionWithContext(submitError, {
+        action: "api_activity_builder_submit",
+        page: "/tools/activity-builder"
+      });
       setError(submitError instanceof Error ? submitError.message : "Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
   }
+
 
   function goToPreviousActivity() {
     setCopiedField(null);

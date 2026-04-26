@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { Navbar } from "@/components/home/navbar";
+import { trackEvent } from "@/lib/analytics";
+import { captureExceptionWithContext } from "@/lib/sentry";
 
 type EssayFormData = {
   lifeExperience: string;
@@ -59,13 +61,20 @@ export default function EssayPage() {
         throw new Error(errorMessage);
       }
 
-      setIdeas(Array.isArray(data) ? data : []);
+      const nextIdeas = Array.isArray(data) ? data : [];
+      setIdeas(nextIdeas);
+      trackEvent("generated_essay", { tool: "essay", idea_count: nextIdeas.length });
     } catch (submitError) {
+      captureExceptionWithContext(submitError, {
+        action: "api_essay_submit",
+        page: "/essay"
+      });
       setError(submitError instanceof Error ? submitError.message : "Something went wrong while loading essay ideas.");
     } finally {
       setLoading(false);
     }
   }
+
 
   return (
     <>
