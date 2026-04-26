@@ -25,7 +25,7 @@ html {
 
 body {
   margin: 0;
-  background: var(--background);
+  background: var(--viewport-edge-bg);
   color: var(--foreground);
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   overflow-x: clip;
