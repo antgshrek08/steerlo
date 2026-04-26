@@ -33,7 +33,7 @@ export function Navbar() {
       initial={{ y: -100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
-      className={`fixed left-0 right-0 top-0 z-50 pt-[env(safe-area-inset-top)] transition-all duration-300 ${
+      className={`fixed left-0 right-0 top-0 z-50 pt-[var(--safe-area-top)] transition-all duration-300 ${
         scrolled ? "bg-black/35 shadow-sm backdrop-blur-md" : "bg-transparent"
       }`}
     >
