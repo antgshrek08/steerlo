@@ -3,10 +3,25 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Mail } from "lucide-react";
+import { useAuth } from "@/components/auth/AuthProvider";
 import { ContactModal } from "@/components/home/contact-modal";
 
 export function ContactSection() {
   const [contactModalOpen, setContactModalOpen] = useState(false);
+  const { loading, openAuthModal, user } = useAuth();
+
+  function handleContactClick() {
+    if (loading) {
+      return;
+    }
+
+    if (!user) {
+      openAuthModal("login");
+      return;
+    }
+
+    setContactModalOpen(true);
+  }
 
   return (
     <section id="contact" className="px-6 py-24 md:py-32">
@@ -22,7 +37,7 @@ export function ContactSection() {
           <p className="mb-8 text-lg text-white/80">Have questions or feedback? We&apos;d love to hear from you.</p>
           <motion.button
             type="button"
-            onClick={() => setContactModalOpen(true)}
+            onClick={handleContactClick}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-8 py-4 font-medium text-white shadow-sm transition-shadow duration-200 hover:bg-indigo-500 hover:shadow-md"

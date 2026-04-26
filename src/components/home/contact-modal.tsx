@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { X } from "lucide-react";
+import { useAuth } from "@/components/auth/AuthProvider";
 
 type ContactModalProps = {
   isOpen: boolean;
@@ -14,31 +15,18 @@ type SubjectOption = "Steerlo Support Request" | "Steerlo Bug Report" | "Steerlo
 const supportEmail = "support@steerlo.com";
 
 export function ContactModal({ isOpen, onClose }: ContactModalProps) {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [subject, setSubject] = useState<SubjectOption>("Steerlo Support Request");
   const [sending, setSending] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [closeTimerId, setCloseTimerId] = useState<number | null>(null);
+  const { loading, openAuthModal, user } = useAuth();
 
   const canSend = useMemo(() => message.trim().length > 0, [message]);
-  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-  const isEmailValid = useMemo(() => {
-    if (!email.trim()) {
-      return true;
-    }
-
-    return emailPattern.test(email.trim());
-  }, [email]);
-
-  const canSubmit = canSend && isEmailValid && !sending;
+  const canSubmit = canSend && Boolean(user?.email) && !sending;
 
   function resetForm() {
-    setName("");
-    setEmail("");
     setMessage("");
     setSubject("Steerlo Support Request");
     setSending(false);
@@ -60,6 +48,12 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
       return;
     }
 
+    if (!loading && !user) {
+      handleClose();
+      openAuthModal("login");
+      return;
+    }
+
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
 
@@ -75,14 +69,14 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", handleEscape);
     };
-  }, [isOpen]);
+  }, [isOpen, loading, openAuthModal, user]);
 
   if (!isOpen) {
     return null;
   }
 
   async function handleSendMessage() {
-    if (!canSubmit) {
+    if (!canSubmit || !user?.email) {
       return;
     }
 
@@ -91,14 +85,14 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
     setErrorMessage(null);
 
     try {
+      const idToken = await user.getIdToken();
       const response = await fetch("/api/contact", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${idToken}`
         },
         body: JSON.stringify({
-          name: name.trim(),
-          email: email.trim(),
           message: message.trim(),
           subject
         })
@@ -156,6 +150,7 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
         <p className="mt-2 text-sm text-white/75">
           Support email: <span className="font-medium text-white">{supportEmail}</span>
         </p>
+        {user?.email ? <p className="mt-1 text-xs text-white/55">Sending as {user.email}</p> : null}
 
         <p className="mt-3 rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-xs text-white/75">
           This sends your message directly to the support inbox
@@ -192,35 +187,6 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
             void handleSendMessage();
           }}
         >
-          <div>
-            <label htmlFor="contact-name" className="mb-1 block text-sm font-medium text-white/90">
-              Name (optional)
-            </label>
-            <input
-              id="contact-name"
-              type="text"
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              className="w-full rounded-lg border border-white/20 bg-slate-950/50 px-3 py-2 text-sm text-white placeholder:text-white/50 outline-none transition focus:border-indigo-300 focus:ring-4 focus:ring-indigo-400/20"
-              placeholder="Your name"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="contact-email" className="mb-1 block text-sm font-medium text-white/90">
-              Email (optional)
-            </label>
-            <input
-              id="contact-email"
-              type="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              className="w-full rounded-lg border border-white/20 bg-slate-950/50 px-3 py-2 text-sm text-white placeholder:text-white/50 outline-none transition focus:border-indigo-300 focus:ring-4 focus:ring-indigo-400/20"
-              placeholder="you@example.com"
-            />
-            {!isEmailValid ? <p className="mt-1 text-xs text-rose-300">Please enter a valid email address.</p> : null}
-          </div>
-
           <div>
             <label htmlFor="contact-message" className="mb-1 block text-sm font-medium text-white/90">
               Message
