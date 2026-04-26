@@ -124,7 +124,7 @@ export function AuthModal({ isOpen, mode, onModeChange, onClose, onSuccess }: Au
       <div className="absolute inset-0 bg-slate-950/70 backdrop-blur-sm" />
 
       <div
-        className="relative z-[81] w-full max-w-md rounded-2xl border border-white/20 bg-slate-900/95 p-6 text-white shadow-[0_16px_50px_rgba(2,6,23,0.55)]"
+        className="relative z-[81] w-full max-w-md max-h-[90vh] overflow-y-auto rounded-2xl border border-white/20 bg-slate-900/95 p-4 text-white shadow-[0_16px_50px_rgba(2,6,23,0.55)] sm:p-6"
         onClick={(event) => event.stopPropagation()}
       >
         <button

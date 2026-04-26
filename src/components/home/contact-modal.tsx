@@ -138,7 +138,7 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 8, scale: 0.98 }}
         transition={{ duration: 0.18, ease: "easeOut" }}
-        className="relative z-[86] w-full max-w-lg rounded-2xl border border-white/20 bg-slate-900/95 p-6 text-white shadow-[0_18px_56px_rgba(2,6,23,0.6)]"
+        className="relative z-[86] w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl border border-white/20 bg-slate-900/95 p-6 text-white shadow-[0_18px_56px_rgba(2,6,23,0.6)]"
         onClick={(event) => event.stopPropagation()}
       >
         <button

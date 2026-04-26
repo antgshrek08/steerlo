@@ -95,7 +95,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.98 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="relative z-[91] w-full max-w-md rounded-2xl border border-white/20 bg-slate-900/95 p-6 text-white shadow-[0_16px_50px_rgba(2,6,23,0.55)]"
+            className="relative z-[91] w-full max-w-md max-h-[90vh] overflow-y-auto rounded-2xl border border-white/20 bg-slate-900/95 p-4 text-white shadow-[0_16px_50px_rgba(2,6,23,0.55)] sm:p-6"
             onClick={(event) => event.stopPropagation()}
           >
             <button

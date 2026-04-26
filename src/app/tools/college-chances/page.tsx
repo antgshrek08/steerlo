@@ -492,7 +492,7 @@ export default function CollegeChancesPage() {
                   />
                 </label>
 
-                <div className="grid grid-cols-[110px_1fr] gap-3">
+                <div className="grid gap-3 sm:grid-cols-[110px_1fr]">
                   <label className="space-y-2">
                     <span className="text-sm font-medium text-white/90">Exam</span>
                     <select

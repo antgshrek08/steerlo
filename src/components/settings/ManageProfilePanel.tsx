@@ -267,7 +267,7 @@ export function ManageProfilePanel({ isOpen, onClose, authProvider }: ManageProf
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 12, scale: 0.98 }}
           transition={{ duration: 0.2, ease: "easeOut" }}
-          className="relative z-[101] w-full max-w-lg rounded-2xl border border-white/20 bg-slate-900/95 p-6 text-white shadow-[0_18px_56px_rgba(2,6,23,0.6)]"
+          className="relative z-[101] w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl border border-white/20 bg-slate-900/95 p-4 text-white shadow-[0_18px_56px_rgba(2,6,23,0.6)] sm:p-6"
           onClick={(event) => event.stopPropagation()}
         >
           <button
@@ -366,7 +366,7 @@ export function ManageProfilePanel({ isOpen, onClose, authProvider }: ManageProf
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 8, scale: 0.98 }}
               transition={{ duration: 0.18, ease: "easeOut" }}
-              className="relative z-[102] w-full max-w-md rounded-2xl border border-white/20 bg-slate-900/98 p-5 text-white shadow-[0_18px_56px_rgba(2,6,23,0.7)]"
+              className="relative z-[102] w-full max-w-md max-h-[90vh] overflow-y-auto rounded-2xl border border-white/20 bg-slate-900/98 p-4 text-white shadow-[0_18px_56px_rgba(2,6,23,0.7)] sm:p-5"
               onClick={(event) => event.stopPropagation()}
               role="dialog"
               aria-modal="true"
